@@ -176,7 +176,7 @@ class Vector:
         Funció que retorna la longitud del vector
             Passem com a argument el propi vector i obtenim la longitud d'aquest. 
         '''
-        return en(self.vector)  
+        return len(self.vector)  
 
 # ------------------------------------------------------------------------------------
     

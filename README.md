@@ -133,6 +133,33 @@ Vector([1.0, 2.0, 1.0])
 Vector([1.0, -1.0, 1.0])
 '''
 # Com que és una classe el nom comença en MAJUSCULA
+'''
+Txell Vilamajó i Puixeu
+TASCA 3: APA CURS 2025 - 2026
+
+Classe per la grestió de vectors:
+
+Tests uniteris:
+>>> v1 = Vector([1, 2, 3])
+>>> v2 = Vector([4, 5, 6])
+>>> v1 * 2
+Vector([2, 4, 6])
+
+>>> v1 * v2
+Vector([4, 10, 18])
+
+>>> v1 @ v2
+32
+
+>>> v3 = Vector([2, 1, 2])
+>>> v4 = Vector([0.5, 1, 0.5])
+>>> v3 // v4
+Vector([1.0, 2.0, 1.0])
+
+>>> v3 % v4
+Vector([1.0, -1.0, 1.0])
+'''
+# Com que és una classe el nom comença en MAJUSCULA
 class Vector:
     vector = []  # Una llista buida també es pot crear amb: vector = list() 
     # VECTOR:
@@ -176,77 +203,85 @@ class Vector:
         Funció que retorna la longitud del vector
             Passem com a argument el propi vector i obtenim la longitud d'aquest. 
         '''
-        return en(self.vector)  
+        return len(self.vector)  
 
 # ------------------------------------------------------------------------------------
+    def __getitem__(self, key):
+        """
+        Retrona l'element kèssim del vector
+        """
+        return self.vector[key]
+
+
+    def __setitem__(self, key, value):
+        """
+        Permet l'assignació de valors al vector
+        """
+        self.vector[key] = value
+# ------------------------------------------------------------------------------------
     
-    def __mul__ (self, altre):
+    def __mul__ (self, other):
         '''
         Multiplicacio vector*vector o vector*numero
             Passem com a argument dos vectors o un vector i un escalar.
             Retorna un vector que eés el resultat de la multiplicació vector*vector o vector*numero
         '''
-        vector_multiplicacio = []
-        if type(altre) == int or type(altre) == float: 
-            # CAS 1: vector * numero
-            for i in range(len(self.vector)):
-                vector_multiplicacio.append(self.vector[i]*altre)
+        if isinstance(other, (int, float, complex)):
+            return Vector([element*other for element in self])
+
         else:
-            # CAS 2: vector * vector
-            for i in range(len(self.vector)):
-                vector_multiplicacio.append(self.vector[i] * altre.vector[i])
-        return Vector(vector_multiplicacio)
+            return Vector([un*altre for un, altre in zip(self, other)])
+ 
 
 # ------------------------------------------------------------------------------------
 
-    def __rmul__(self, k):
-        """
-        Retorna numero * vector
-            Passem com a argument el propi vector i un escalar.
-        """
-        vector_escalar = []
-        for i in self.vector:
-            vector_escalar.append(i * k)
-        return Vector(vector_escalar)
+    __rmul__=__mul__
 
 # ------------------------------------------------------------------------------------
 
-    def __matmul__(self, altre):
+    def __matmul__(self, other):
         '''
         Producte escalar (operador @)
             v1[0]*v2[0] + v1[1]*v2[1]...
             Passem com a arguments dos vectors per tal de fer el producte escalar.
         '''
-        total = 0
-        for i in range(len(self.vector)):
-            total = total + self.vector[i]*altre.vector[i]
-        return total
+        if not isinstance(other, Vector):
+            raise TypeError("El producte escalar només es pot fer entre dos vectors.")
+    
+        if len(self) != len(other):
+            raise ValueError("Els vectors han de tenir la mateixa longitud.")
 
+        # Multipliquem parelles i sumem el resultat
+        return sum(un * altre for un, altre in zip(self, other))
+        
 # ------------------------------------------------------------------------------------
 
-    def __floordiv__(self, altre):
+    def __floordiv__(self, other):
         '''
         Retorna la component paralela (operador //)
             ((v1 @ v2) / (v2 @ v2)) * v2
             Passem com a arguments dos vectors.
         '''
-        numerador = self @ altre
-        denominador = altre @ altre
-        return ((numerador/denominador)*altre) 
+        return ((self @ other) / (other @ other)) * other
 
 # ------------------------------------------------------------------------------------
 
-    def __mod__(self, altre):
+    def __sub__(self, other):  # El necessitem per després poder fer la resta en el __mod__
+        '''
+        Resta de vectors (self - other)
+        '''
+        # Fem la resta element a element
+        return Vector([un - altre for un, altre in zip(self, other)])
+        
+
+    def __mod__(self, other):
         '''
         Retorna la component normal
             v1 - v1_paralela
             Passem com a arguments dos vectors.
         '''
-        v_paralel = self // altre
-        component_normal = []
-        for i in range(len(self.vector)):
-            component_normal.append(self.vector[i] - v_paralel.vector[i])
-        return Vector(component_normal)
+        return self - (self // other)
+
         
 # ------------------------------------------------------------------------------------
     
